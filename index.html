@@ -942,7 +942,7 @@
 			<div style="position:absolute; inset:0; background:rgba(0,0,0,0.35); pointer-events:none;"></div>
 			<div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap:14px;">
 				<div style="position:relative;">
-					<img id="titleLogoImg" src="assets/logo.png" style="max-width:340px; image-rendering:pixelated; display:block;">
+					<img id="titleLogoImg" src="" style="max-width:340px; image-rendering:pixelated; display:block;">
 					<div id="titleLogoText" class="titleLogo" style="display:none;">MINECRAFT</div>
 				</div>
 				<div class="titleSub" id="titleVersion" style="font-family:'Monocraft',monospace;"></div>
@@ -982,10 +982,9 @@
 						This is not affiliated with, endorsed by, or connected to Mojang AB or Microsoft Corporation in any way. It is an independent, fan-made project created by a solo indie developer for educational and non-commercial purposes.
 					</div>
 					<div style="font-family:'Minecraft',sans-serif; font-size:22px; margin-top:4px;">MINECRAFT: JAVASCRIPT</div>
-					<div style="font-size:12px; color:var(--ore-text-dim);">Created by Starexx &mdash; an independent developer.</div>
 					<div style="text-align:left; font-size:11px; line-height:1.7; color:var(--ore-text-dim); max-width:560px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px; margin-top:8px;">
 						<div style="font-family:'Minecraft',sans-serif; font-size:13px; color:var(--ore-text); margin-bottom:8px; text-align:center;">MIT License</div>
-						<p style="margin:0;">Copyright (c) 2026 Starexx. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+						<p style="margin:0;">Copyright (c) 2026 Starexx. Permission is hereby granted, free of charge, to any <person></person> obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
 					</div>
 				</div>
 			</div>
@@ -1256,7 +1255,7 @@ ctx.setTransform(__initSize.dpr, 0, 0, __initSize.dpr, 0, 0)
 
 
 var MathGlob = Math
-function Minecraft() {
+function jsCraft() {
 	let Math = MathGlob
 	let setPixel, getPixels
 	function crackTexture(stage) {
@@ -5007,13 +5006,13 @@ function Minecraft() {
 				this.chunkGenQueue.sort(sortChunks)
 			}
 
-			if (Key.leftMouse && !Key.control && p.lastBreak < Date.now() - 250 && screen === "play") {
+			if (Key.leftMouse && p.lastBreak < Date.now() - 250 && screen === "play") {
 				changeWorldBlock(0)
 			}
-			if ((Key.rightMouse || Key.leftMouse && Key.control) && p.lastPlace < Date.now() - 250) {
+			if (Key.rightMouse && p.lastPlace < Date.now() - 250) {
 				newWorldBlock()
 			}
-			if (Key.leftMouse && p.autoBreak && !Key.control) {
+			if (Key.leftMouse && p.autoBreak) {
 				changeWorldBlock(0)
 			}
 
@@ -5341,7 +5340,7 @@ function Minecraft() {
 		if(Key.arrowup) p.rx += 0.1 * dt
 		if(Key.arrowdown) p.rx -= 0.1 * dt
 
-		if (!p.sprinting && Key.q && !p.sneaking && Key.w) {
+		if (!p.sprinting && Key.control && !p.sneaking && Key.w) {
 			p.FOV(settings.fov + 10, 250)
 			p.sprinting = true
 		}
@@ -6082,11 +6081,7 @@ function Minecraft() {
 			} else {
 				place = false
 				if(e.button === 0) {
-					if(Key.control) {
-						place = true
-					} else {
-						changeWorldBlock(0)
-					}
+					changeWorldBlock(0)
 				}
 				holding = inventory.hotbar[inventory.hotbarSlot]
 				if(e.button === 2 && holding) {
@@ -6126,8 +6121,19 @@ function Minecraft() {
 		}
 		Key[k] = true
 
-		if (k === "t") {
-			initTextures()
+		if (k === "f11") {
+			e.preventDefault()
+			if (doc.fullscreenElement) {
+				doc.exitFullscreen()
+			} else {
+				doc.documentElement.requestFullscreen()
+			}
+		}
+
+		if (k === "f3") {
+			e.preventDefault()
+			debugEnabled = !debugEnabled
+			updateDebugOverlay()
 		}
 
 		if (k === "enter") {
@@ -6136,7 +6142,7 @@ function Minecraft() {
 		}
 
 		if (screen === "play") {
-			if(k === "p") {
+			if(k === "escape") {
 				releasePointer()
 				changeScene("pause")
 			}
@@ -6175,10 +6181,27 @@ function Minecraft() {
 				updateHUD = true
 			}
 
-			if (k === "c") {
+			if (k === "t" || k === "/") {
 				changeScene("chat")
 				releasePointer()
-				setTimeout(() => { let ci = document.getElementById("chatInput"); if (ci) ci.focus() }, 50)
+				let prefill = k === "/" ? "/" : ""
+				setTimeout(() => {
+					let ci = document.getElementById("chatInput")
+					if (ci) {
+						ci.value = prefill
+						ci.focus()
+					}
+				}, 50)
+			}
+
+			if (k === "q") {
+				holding = inventory.hotbar[inventory.hotbarSlot]
+				if (holding) {
+					inventory.hotbar[inventory.hotbarSlot] = 0
+					holding = 0
+					updateHUD = true
+					chatLog("Dropped item", "chatOk")
+				}
 			}
 
 			if (k === ";") {
@@ -6192,7 +6215,7 @@ function Minecraft() {
 				updateHUD = true
 			}
 		} else if (screen === "pause") {
-			if(k === "p") {
+			if(k === "escape") {
 				startGame()
 			}
 		} else if (screen === "chat") {
@@ -6233,7 +6256,7 @@ function Minecraft() {
 		if (screen === "play" && Key.control) {
 			releasePointer()
 			e.preventDefault()
-			e.returnValue = "Q is the sprint button; Ctrl + W closes the page."
+			e.returnValue = "Ctrl is the sprint button; Ctrl + W closes the page."
 			return true
 		}
 	}
@@ -7652,8 +7675,23 @@ function runChatCommand(raw) {
 
 	return gameLoop
 }
-
-init = Minecraft() // codebase @Willard
+ 
+/*
+ * Copyright (c) 2026 Starexx
+ * Licensed under the MIT License.
+ *
+ * Minekhan Codebase: Willard
+ * Monocraft Font: Idrees Hassan
+ * Minecraft Ten: Mojang Studios
+ * Textures & Icons: Willard, Mojang Studios
+ * User Interface (Ore UI & Screens): Starexx
+ * Background Image: "Rainy Swamp" (Minecraft)
+ * - Source: r/Minecraft (u/Sunghwan1234)
+ *
+ * Github: realstarexx/minecraft (2026-07-13)
+ */
+ 
+init = jsCraft()
 
 if (window.parent.raf) {
 	window.cancelAnimationFrame(window.parent.raf)
